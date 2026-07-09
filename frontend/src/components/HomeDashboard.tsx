@@ -50,6 +50,16 @@ export default function HomeDashboard({
   const [standings, setStandings] = useState<Standings["standings"] | null>(null);
   const [standingsLoading, setStandingsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [doneList, setDoneList] = useState<Thread[]>([]);
+  const [showDone, setShowDone] = useState(false);
+
+  const loadDone = useCallback(async () => {
+    try {
+      setDoneList(await api.doneThreads());
+    } catch {
+      setDoneList([]);
+    }
+  }, []);
 
   const loadAgenda = useCallback(async (refresh: boolean) => {
     setAgendaLoading(true);
@@ -86,7 +96,8 @@ export default function HomeDashboard({
     loadAgenda(false);
     loadBriefing(false);
     loadStandings(false);
-  }, [loadAgenda, loadBriefing, loadStandings]);
+    loadDone();
+  }, [loadAgenda, loadBriefing, loadStandings, loadDone]);
 
   const removeFromAgenda = (id: number) =>
     setAgenda((a) =>
@@ -112,12 +123,13 @@ export default function HomeDashboard({
       try {
         await api.undone(id);
         await loadAgenda(true); // restored item reappears where it was
+        loadDone();
         onStateChanged();
       } catch {
         loadAgenda(false);
       }
     },
-    [onStateChanged, loadAgenda],
+    [onStateChanged, loadAgenda, loadDone],
   );
 
   const complete = useCallback(
@@ -125,13 +137,14 @@ export default function HomeDashboard({
       removeFromAgenda(id);
       try {
         await api.done(id);
+        loadDone();
         onStateChanged();
         flash("Marked done", "ok", { label: "Undo", run: () => undo(id) });
       } catch {
         loadAgenda(false);
       }
     },
-    [onStateChanged, loadAgenda, flash, undo],
+    [onStateChanged, loadAgenda, loadDone, flash, undo],
   );
 
   const drafted = threads.filter((t) => t.status === "drafted").length;
@@ -277,6 +290,51 @@ export default function HomeDashboard({
               <Empty>Not waiting on anyone.</Empty>
             )}
           </Box>
+
+          {doneList.length > 0 && (
+            <Box
+              title="Done"
+              icon="check"
+              hint="ticked by mistake? restore it"
+              className="col-span-12"
+              meta={doneList.length}
+              action={
+                <button
+                  onClick={() => setShowDone((v) => !v)}
+                  className="font-mono text-[10px] text-faint transition-colors hover:text-amber"
+                >
+                  {showDone ? "hide" : "show"}
+                </button>
+              }
+            >
+              {showDone ? (
+                <div className="grid grid-cols-1 gap-1.5 lg:grid-cols-2">
+                  {doneList.slice(0, 20).map((t) => (
+                    <div key={t.id} className="group flex items-center gap-2 rounded-lg px-3 py-1.5 hover:bg-raised">
+                      <button onClick={() => onOpenThread(t.id)} className="min-w-0 flex-1 text-left">
+                        <span className="block truncate text-[12.5px] text-ink/70 line-through decoration-faint/60">
+                          {t.subject}
+                        </span>
+                        <span className="font-mono text-[10px] text-faint">{t.last_sender}</span>
+                      </button>
+                      <button
+                        onClick={() => undo(t.id)}
+                        title="Restore to the deck"
+                        className="shrink-0 rounded-md border border-hairline-strong px-2 py-0.5 font-mono text-[10px] text-muted transition-colors hover:border-amber hover:text-amber"
+                      >
+                        restore
+                      </button>
+                    </div>
+                  ))}
+                  {doneList.length > 20 && (
+                    <p className="px-3 py-1 font-mono text-[10px] text-faint">+{doneList.length - 20} more</p>
+                  )}
+                </div>
+              ) : (
+                <Empty>{doneList.length} completed. Click “show” to review or restore.</Empty>
+              )}
+            </Box>
+          )}
 
           <Box title="Projects" icon="folder" hint="current standing" className="col-span-12" action={
             <button onClick={() => loadStandings(true)} disabled={standingsLoading} className="text-faint transition-colors hover:text-amber disabled:opacity-50">

@@ -356,6 +356,7 @@ def list_threads(
     unclassified: bool = False,
     digest: bool = False,
     status: str | None = None,
+    done: bool | None = None,
     session: Session = Depends(get_session),
 ):
     q = select(Email).order_by(Email.updated_at.desc())
@@ -369,6 +370,8 @@ def list_threads(
         q = q.where(Email.project_id == project_id)
     if status:
         q = q.where(Email.status == status)
+    if done is not None:
+        q = q.where(Email.done.is_(done))
     return [_thread_out(e) for e in session.scalars(q)]
 
 

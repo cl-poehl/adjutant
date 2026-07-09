@@ -41,7 +41,7 @@ export default function Home() {
     action?: { label: string; run: () => void },
   ) => {
     setNotice({ text, kind, action });
-    setTimeout(() => setNotice(null), kind === "err" ? 8000 : action ? 6500 : 4500);
+    setTimeout(() => setNotice(null), kind === "err" ? 8000 : action ? 15000 : 4500);
   };
 
   const refreshProjects = useCallback(async () => {
@@ -348,8 +348,9 @@ export default function Home() {
                 notice.action!.run();
                 setNotice(null);
               }}
-              className="ml-1 rounded-md border border-hairline-strong px-2 py-0.5 text-[11px] text-ink transition-colors hover:bg-raised"
+              className="ml-2 flex items-center gap-1 rounded-md border border-amber-dim bg-amber/15 px-3 py-1 text-[12px] font-semibold text-amber transition-colors hover:bg-amber/25"
             >
+              <Icon.arrow size={12} className="-scale-x-100" />
               {notice.action.label}
             </button>
           )}
