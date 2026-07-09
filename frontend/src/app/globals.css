@@ -1,0 +1,354 @@
+@import "tailwindcss";
+
+/* ════════════════════════════════════════════════════════════════
+   Adjutant — design system
+   A clean, white, professional workflow app. Soft cool-white surfaces,
+   hairline borders, gentle elevation, a single calm slate-blue accent,
+   serif for reading, mono for labels. A barely-there "waterfall" mist
+   drifts behind frosted surfaces — soothing, never penetrant.
+   White is the default; a cool slate dark mode lives under html.dark.
+   ════════════════════════════════════════════════════════════════ */
+@theme {
+  /* surfaces — soft cool white, each step a touch deeper */
+  --color-base: #f7f8fa;        /* page background */
+  --color-night: #0e1118;
+  --color-panel: #ffffff;       /* cards, sidebar */
+  --color-raised: #eef1f5;      /* hover, outline buttons, skeleton */
+  --color-overlay: #ffffff;     /* popovers, palette, toast */
+  --color-hairline: #e7eaf0;
+  --color-hairline-strong: #d4d9e3;
+
+  /* ink */
+  --color-ink: #161a22;         /* near-black, cool */
+  --color-muted: #5b6472;
+  --color-faint: #98a1b0;
+
+  /* accents — one calm slate-blue brand */
+  --color-amber: #4961e0;       /* brand — primary actions, active states */
+  --color-amber-dim: #b9c2f4;   /* light slate — borders, dim accents */
+  --color-blue: #2f8fe0;        /* info / category */
+  --color-green: #14a07a;       /* success */
+  --color-red: #e0544b;         /* error / warning */
+  --color-violet: #7a5bc0;      /* secondary accent */
+
+  /* one cool, minimal family everywhere; mono for labels */
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "SF Mono", monospace;
+
+  --radius: 0.8rem;
+  --shadow-card: 0 1px 2px rgba(20, 28, 54, 0.04), 0 12px 32px -20px rgba(20, 28, 54, 0.16);
+  --shadow-pop: 0 18px 50px -14px rgba(20, 28, 54, 0.22);
+}
+
+/* ── cool slate dark mode — overrides tokens; html.dark toggles it ── */
+html.dark {
+  --color-base: #0d1017;
+  --color-night: #0d1017;
+  --color-panel: #141925;
+  --color-raised: #1b2233;
+  --color-overlay: #1f2738;
+  --color-hairline: #283047;
+  --color-hairline-strong: #38425c;
+
+  --color-ink: #eef1f6;
+  --color-muted: #9aa4b6;
+  --color-faint: #5e6779;
+
+  --color-amber: #6f87ff;
+  --color-amber-dim: #3a4a8f;
+  --color-blue: #6cc0ff;
+  --color-green: #4fd0a0;
+  --color-red: #f08a7f;
+  --color-violet: #b29cf0;
+
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.4), 0 12px 32px -20px rgba(0, 0, 0, 0.6);
+  --shadow-pop: 0 18px 50px -14px rgba(0, 0, 0, 0.62);
+}
+
+html,
+body {
+  height: 100%;
+  background: var(--color-base);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--color-amber) 22%, transparent);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-hairline-strong) transparent;
+}
+*::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--color-hairline-strong);
+  border-radius: 999px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   Waterfall mist — a soothing, barely-there cool backdrop.
+   Two fixed layers behind all content (z-index 0): faint vertical
+   streaks + a slow downward-drifting sheen. Kept very low-opacity so
+   it never competes with text. Honors prefers-reduced-motion.
+   ════════════════════════════════════════════════════════════════ */
+.app-bg {
+  position: relative;
+  background:
+    radial-gradient(1000px 520px at 82% -12%, rgba(73, 97, 224, 0.06), transparent 60%),
+    radial-gradient(760px 620px at 6% 112%, rgba(73, 97, 224, 0.05), transparent 62%),
+    var(--color-base);
+}
+.app-bg > * {
+  position: relative;
+  z-index: 1;
+}
+.app-bg::before {
+  /* faint vertical water streaks, faded top & bottom */
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: repeating-linear-gradient(
+    90deg,
+    transparent 0 22px,
+    rgba(73, 97, 224, 0.022) 22px 23px,
+    transparent 23px 46px
+  );
+  -webkit-mask-image: linear-gradient(180deg, transparent, #000 16%, #000 74%, transparent);
+  mask-image: linear-gradient(180deg, transparent, #000 16%, #000 74%, transparent);
+}
+.app-bg::after {
+  /* slow falling sheen — gentle downward drift */
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(73, 97, 224, 0.05) 45%,
+    transparent 90%
+  );
+  background-size: 100% 55%;
+  background-repeat: no-repeat;
+  animation: waterfall 14s linear infinite;
+}
+@keyframes waterfall {
+  from { background-position: 0 -60%; }
+  to   { background-position: 0 165%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .app-bg::after { animation: none; opacity: 0.5; }
+}
+html.dark .app-bg {
+  background:
+    radial-gradient(1000px 520px at 82% -12%, rgba(111, 135, 255, 0.12), transparent 60%),
+    radial-gradient(760px 620px at 6% 112%, rgba(111, 135, 255, 0.08), transparent 62%),
+    var(--color-base);
+}
+html.dark .app-bg::before {
+  background-image: repeating-linear-gradient(
+    90deg,
+    transparent 0 22px,
+    rgba(140, 160, 255, 0.04) 22px 23px,
+    transparent 23px 46px
+  );
+}
+html.dark .app-bg::after {
+  background: linear-gradient(180deg, transparent 0%, rgba(140, 160, 255, 0.07) 45%, transparent 90%);
+  background-size: 100% 55%;
+  background-repeat: no-repeat;
+}
+
+/* ── typography helpers ───────────────────────────────────────── */
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-faint);
+}
+.display {
+  font-family: var(--font-serif);
+  letter-spacing: -0.01em;
+}
+
+.email-body {
+  font-family: var(--font-serif);
+  font-size: 0.975rem;
+  line-height: 1.65;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.draft-editor {
+  font-family: var(--font-serif);
+  font-size: 0.975rem;
+  line-height: 1.6;
+  resize: none;
+}
+.draft-editor:focus {
+  outline: none;
+}
+
+/* ── surfaces & primitives ────────────────────────────────────── */
+.glass {
+  background: color-mix(in srgb, var(--color-panel) 78%, transparent);
+  backdrop-filter: blur(16px) saturate(1.1);
+}
+.card {
+  background: color-mix(in srgb, var(--color-panel) 88%, transparent);
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+  backdrop-filter: blur(7px);
+}
+.card-hover {
+  transition: transform 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
+}
+.card-hover:hover {
+  transform: translateY(-2px);
+  border-color: var(--color-hairline-strong);
+  box-shadow: var(--shadow-pop);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 999px;
+  border: 1px solid var(--color-hairline-strong);
+  color: var(--color-muted);
+  white-space: nowrap;
+}
+
+/* buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  border-radius: 0.6rem;
+  font-size: 12.5px;
+  font-weight: 500;
+  transition: all 0.15s ease;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.btn:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+.btn-primary {
+  background: var(--color-amber);
+  color: #ffffff;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  box-shadow: 0 1px 2px rgba(40, 55, 140, 0.22), 0 8px 20px -10px rgba(73, 97, 224, 0.55);
+}
+.btn-primary:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--color-amber) 88%, black);
+}
+.btn-outline {
+  border: 1px solid var(--color-hairline-strong);
+  background: var(--color-panel);
+  color: var(--color-ink);
+  padding: 0.45rem 0.9rem;
+}
+.btn-outline:hover:not(:disabled) {
+  border-color: var(--color-amber);
+  color: var(--color-amber);
+}
+.btn-ghost {
+  color: var(--color-muted);
+  padding: 0.4rem 0.7rem;
+}
+.btn-ghost:hover:not(:disabled) {
+  color: var(--color-ink);
+  background: color-mix(in srgb, var(--color-raised) 70%, transparent);
+}
+
+/* meter dots */
+.dot {
+  height: 6px;
+  width: 6px;
+  border-radius: 999px;
+}
+
+/* ── focus guides: a two-tier emphasis hierarchy ─────────────────
+   .strong — BOLD only: secondary signals (names, acronyms, obligations)
+   .mark   — BOLD + HIGHLIGHTED: the act-now critical bits (dates, money,
+             times) and model-marked **key phrases**. The wash makes this
+             tier clearly outrank plain bold so the eye lands here first. */
+.strong {
+  font-weight: 650;
+  color: var(--color-ink);
+}
+.mark {
+  background: color-mix(in srgb, var(--color-amber) 16%, transparent);
+  color: var(--color-ink);
+  border-radius: 4px;
+  padding: 0 3.5px;
+  font-weight: 650;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+/* ── motion ───────────────────────────────────────────────────── */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.spin {
+  animation: spin 0.9s linear infinite;
+}
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(7px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.fade-up {
+  animation: fadeUp 0.2s ease-out both;
+}
+@keyframes shimmer {
+  0% {
+    background-position: -400px 0;
+  }
+  100% {
+    background-position: 400px 0;
+  }
+}
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--color-raised) 25%,
+    var(--color-overlay) 50%,
+    var(--color-raised) 75%
+  );
+  background-size: 800px 100%;
+  animation: shimmer 1.4s infinite linear;
+}
