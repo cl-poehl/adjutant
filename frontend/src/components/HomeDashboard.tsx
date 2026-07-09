@@ -34,6 +34,7 @@ export default function HomeDashboard({
   onOpenProject,
   onOpenBriefing,
   onStateChanged,
+  flash,
 }: {
   threads: Thread[];
   projects: Project[];
@@ -41,6 +42,7 @@ export default function HomeDashboard({
   onOpenProject: (id: number) => void;
   onOpenBriefing: () => void;
   onStateChanged: () => void;
+  flash: (text: string, kind?: "ok" | "err", action?: { label: string; run: () => void }) => void;
 }) {
   const [agenda, setAgenda] = useState<Agenda | null>(null);
   const [agendaLoading, setAgendaLoading] = useState(false);
@@ -105,17 +107,31 @@ export default function HomeDashboard({
     } catch {}
   }, []);
 
-  const complete = useCallback(
+  const undo = useCallback(
     async (id: number) => {
-      removeFromAgenda(id);
       try {
-        await api.done(id);
+        await api.undone(id);
+        await loadAgenda(true); // restored item reappears where it was
         onStateChanged();
       } catch {
         loadAgenda(false);
       }
     },
     [onStateChanged, loadAgenda],
+  );
+
+  const complete = useCallback(
+    async (id: number) => {
+      removeFromAgenda(id);
+      try {
+        await api.done(id);
+        onStateChanged();
+        flash("Marked done", "ok", { label: "Undo", run: () => undo(id) });
+      } catch {
+        loadAgenda(false);
+      }
+    },
+    [onStateChanged, loadAgenda, flash, undo],
   );
 
   const drafted = threads.filter((t) => t.status === "drafted").length;
