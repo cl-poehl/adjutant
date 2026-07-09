@@ -215,6 +215,22 @@ Open the dashboard, hit **Sync now**, and threads are pulled, classified,
 labeled, and replies drafted. Open a thread, edit the draft (autosaves), then
 **Send reply → Confirm**. It goes out from your real account and lands in Sent.
 
+## Make it yours
+
+Everything personal lives in files that stay on your machine (all git-ignored);
+the code ships with deliberately generic defaults.
+
+- **Your writing voice** comes from your real sent mail, pulled into a local
+  style corpus (step 4). Re-run it any time for fresher examples.
+- **`backend/data/founder_profile.md`** is the single biggest lever: it grounds
+  every drafted reply, generated idea, job match, and research brief. Copy it
+  from `founder_profile.example.md` and fill it in honestly.
+- **Projects** you add in the sidebar are the classifier's context; write real
+  descriptions (the people, topics, and keywords that define each).
+- **Fine-tuning** in `backend/.env`: `JOB_PREFS` and `EVENT_INTERESTS` steer the
+  scouts, `BRIEF_TZ` sets your morning-brief time, `MY_ALIASES` lists your other
+  addresses, and the events city is a field in the UI.
+
 ## Cost & automation
 
 The daily agents cost real tokens, and the research brief (multiple web-search
