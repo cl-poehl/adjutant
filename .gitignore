@@ -1,0 +1,32 @@
+# secrets & tokens — never commit
+.env
+*.env
+!.env.example
+credentials.json
+token.json
+
+# data
+*.db
+backend/data/style_corpus.json
+
+# python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# node / next
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+next-env.d.ts
+
+# misc
+.DS_Store
+
+# outlook provider token
+outlook_token.json
+
+# personal founder profile — keep strategy out of the public repo
+backend/data/founder_profile.md
