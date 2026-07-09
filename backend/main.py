@@ -305,7 +305,9 @@ def list_projects(session: Session = Depends(get_session)):
                 digest=p.digest,
                 created_at=p.created_at,
                 thread_count=len(emails),
-                needs_attention=sum(1 for e in emails if e.status in ("needs_reply", "drafted")),
+                needs_attention=sum(
+                    1 for e in emails if e.status in ("needs_reply", "drafted") and not e.done
+                ),
             )
         )
     return out
@@ -498,17 +500,30 @@ def snooze_thread(
 
 @app.post("/threads/{thread_id}/done", response_model=ThreadOut)
 def complete_thread(thread_id: int, session: Session = Depends(get_session)):
-    """Tick an agenda item off as completed. The thread stays visible in its
-    project but stops counting as something waiting on the user."""
+    """Tick an agenda item off as completed. `done` is a pure flag — the thread
+    keeps its status and stays visible in its project, but drops off the deck and
+    stops counting as waiting. Reversible via /undone."""
     e = session.get(Email, thread_id)
     if not e:
         raise HTTPException(404, "Thread not found")
     e.done = True
-    if e.status in ("needs_reply", "drafted"):
-        e.status = "classified"
     session.commit()
     drop_from_cache(thread_id)
     invalidate_standing_cache()  # completing work can change a project's standing
+    return _thread_out(e)
+
+
+@app.post("/threads/{thread_id}/undone", response_model=ThreadOut)
+def uncomplete_thread(thread_id: int, session: Session = Depends(get_session)):
+    """Undo a mark-done (e.g. an accidental tick): the thread counts as waiting
+    again and returns to the deck exactly where it was."""
+    e = session.get(Email, thread_id)
+    if not e:
+        raise HTTPException(404, "Thread not found")
+    e.done = False
+    session.commit()
+    invalidate_cache()  # the restored item must reappear in the agenda
+    invalidate_standing_cache()
     return _thread_out(e)
 
 

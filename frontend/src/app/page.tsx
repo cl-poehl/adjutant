@@ -31,11 +31,17 @@ export default function Home() {
   const [organizing, setOrganizing] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
-  const [notice, setNotice] = useState<{ text: string; kind: "ok" | "err" } | null>(null);
+  const [notice, setNotice] = useState<
+    { text: string; kind: "ok" | "err"; action?: { label: string; run: () => void } } | null
+  >(null);
 
-  const flash = (text: string, kind: "ok" | "err" = "ok") => {
-    setNotice({ text, kind });
-    setTimeout(() => setNotice(null), kind === "err" ? 8000 : 4500);
+  const flash = (
+    text: string,
+    kind: "ok" | "err" = "ok",
+    action?: { label: string; run: () => void },
+  ) => {
+    setNotice({ text, kind, action });
+    setTimeout(() => setNotice(null), kind === "err" ? 8000 : action ? 6500 : 4500);
   };
 
   const refreshProjects = useCallback(async () => {
@@ -259,6 +265,7 @@ export default function Home() {
           <HomeDashboard
             threads={threads}
             projects={projects}
+            flash={flash}
             onOpenThread={openThread}
             onOpenProject={(id) => {
               setSelection({ kind: "project", id });
@@ -335,6 +342,17 @@ export default function Home() {
             <Icon.check size={11} />
           </span>
           <span className={notice.kind === "err" ? "text-red" : "text-muted"}>{notice.text}</span>
+          {notice.action && (
+            <button
+              onClick={() => {
+                notice.action!.run();
+                setNotice(null);
+              }}
+              className="ml-1 rounded-md border border-hairline-strong px-2 py-0.5 text-[11px] text-ink transition-colors hover:bg-raised"
+            >
+              {notice.action.label}
+            </button>
+          )}
         </div>
       )}
     </main>
