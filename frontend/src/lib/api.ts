@@ -131,6 +131,7 @@ export const api = {
     req<Thread>(`/threads/${id}/done`, { method: "POST", body: "{}" }),
   undone: (id: number) =>
     req<Thread>(`/threads/${id}/undone`, { method: "POST", body: "{}" }),
+  doneThreads: () => req<Thread[]>("/threads?done=true"),
   standing: (refresh = false) =>
     req<Standings>(`/standing${refresh ? "?refresh=true" : ""}`, {
       method: "POST",
