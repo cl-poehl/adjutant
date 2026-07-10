@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { api, type Brief, type Finding, type Topic } from "@/lib/api";
+import { api, type Automations, type Brief, type Finding, type Topic } from "@/lib/api";
 import { Icon } from "./Icons";
 import PageHeader from "./PageHeader";
 import Emphasize, { emphasize } from "./Emphasize";
@@ -36,14 +36,20 @@ export default function ResearchPane() {
   const [track, setTrack] = useState<"you" | "venture">("you");
   const [running, setRunning] = useState(false);
   const [briefing, setBriefing] = useState(false);
+  const [auto, setAuto] = useState<Automations | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const [t, b] = await Promise.all([api.research(), api.researchBrief()]);
+      const [t, b, a] = await Promise.all([
+        api.research(),
+        api.researchBrief(),
+        api.automations(),
+      ]);
       setTopics(t);
       setBrief(b);
+      setAuto(a);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load research");
     } finally {
@@ -68,6 +74,18 @@ export default function ResearchPane() {
       setError(e instanceof Error ? e.message : "Research failed");
     } finally {
       setRunning(false);
+    }
+  };
+
+  const toggleDaily = async () => {
+    if (!auto) return;
+    const prev = auto;
+    const next = { ...auto, research: !auto.research };
+    setAuto(next); // optimistic
+    try {
+      setAuto(await api.saveAutomations(next));
+    } catch {
+      setAuto(prev); // revert on failure
     }
   };
 
@@ -118,12 +136,20 @@ export default function ResearchPane() {
         <PageHeader
           eyebrow="Research agent"
           title="Overnight deep-dives"
-          subtitle="Drop in a question; the agent searches the open web (papers, filings, industry press) and reports back sourced findings. Daily topics re-run each night and feed your morning brief."
+          subtitle="Drop in a question; the agent searches the open web (papers, filings, industry press) and reports back sourced findings. The morning brief can run automatically each day, or on demand."
           actions={
-            <button onClick={generateBrief} disabled={briefing} className="btn btn-outline">
-              <Icon.sync size={13} className={briefing ? "spin" : ""} />
-              {briefing ? "Briefing…" : "Generate brief"}
-            </button>
+            <span className="flex items-center gap-3">
+              <span className="flex items-center gap-2" title="Run the two-track morning brief automatically each day">
+                <span className="font-mono text-[10px] uppercase tracking-wide text-muted">
+                  Daily brief {auto ? (auto.research ? "on" : "off") : ""}
+                </span>
+                <Toggle on={!!auto?.research} onClick={toggleDaily} />
+              </span>
+              <button onClick={generateBrief} disabled={briefing} className="btn btn-outline">
+                <Icon.sync size={13} className={briefing ? "spin" : ""} />
+                {briefing ? "Briefing…" : "Generate now"}
+              </button>
+            </span>
           }
         />
 
@@ -229,6 +255,26 @@ export default function ResearchPane() {
         )}
       </div>
     </div>
+  );
+}
+
+function Toggle({ on, onClick }: { on: boolean; onClick: () => void }) {
+  return (
+    <button
+      role="switch"
+      aria-checked={on}
+      onClick={onClick}
+      title={on ? "Daily brief is on — click to turn off" : "Daily brief is off — click to turn on"}
+      className={`relative h-5 w-9 shrink-0 rounded-full border transition-colors ${
+        on ? "border-amber-dim bg-amber/80" : "border-hairline-strong bg-base"
+      }`}
+    >
+      <span
+        className={`absolute top-0.5 h-3.5 w-3.5 rounded-full bg-white shadow-sm transition-all ${
+          on ? "left-[18px]" : "left-0.5"
+        }`}
+      />
+    </button>
   );
 }
 
