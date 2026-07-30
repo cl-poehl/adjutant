@@ -28,25 +28,35 @@ newsletters, job alerts, anything from a no-reply/automated sender. These are "n
 regardless of alarming wording.
 
 Relevance scale:
-- "reply": the latest message is inbound, addressed to the user personally, and \
+- "reply": the latest inbound message involves the user (in the To OR CC line) and \
 awaits a substantive response from them. (A thread forwarded by the user from \
 another of their own accounts still counts as "reply" if the forwarded content \
 awaits their response.)
-  Treat it as "reply" whenever the latest inbound message does ANY of these — \
-even if most of the message is informational/FYI:
-    • asks the user a direct question (e.g. "what time works for you?", "können \
+  Treat it as "reply" whenever the THREAD (look at the whole thread, not only the last \
+message) has ANY of the following still open and NOT yet answered by the user — even if \
+the latest message is someone else agreeing, and EVEN IF THE USER IS ONLY CC'd:
+    • a direct question to the user (e.g. "what time works for you?", "können \
 wir …?", "wäre das ok?")
-    • proposes or tries to schedule a meeting/call and waits on the user to \
-confirm or pick a time
-    • requests a decision, an action, feedback, or a document from the user
-  A real person waiting on the user — especially a known collaborator — almost \
-always means "reply", not "read". When torn between "reply" and "read", choose \
-"reply": a needless draft is cheap, a missed reply is not.
+    • a meeting/call being scheduled where the user has not yet given their OWN \
+availability or confirmation — even if other participants have already agreed a time \
+(the user still owes their yes/no and slot)
+    • a request for a decision, an action, feedback, or a document from the user
+    • an introduction of the user to someone, or a loop-in to a collaboration / \
+project, where a meeting or next step is in flight and the user is an expected \
+participant
+  Being CC'd rather than in "To" does NOT downgrade this: if the user is a named or \
+expected participant — introduced by name, asked to join, or addressed as part of a \
+group ("ihr", "euch", "you both", "wir") — it is "reply". A real person waiting on the \
+user — especially a known collaborator — almost always means "reply", not "read". When \
+torn between "reply" and "read", choose "reply": a needless draft is cheap, a missed \
+reply is not.
 - "read": worth the user's attention — personal or work-related information they \
 should see — but genuinely no response is required (pure FYI, a confirmation, or \
 they already sent the last word and nothing is asked of them).
-- "skip": not worth their attention: newsletters, marketing, promotions, job \
-alerts, social-media notifications, receipts, automated alerts, mass mail.
+- "skip": ONLY automated or bulk mail not worth attention — newsletters, marketing, \
+promotions, job alerts, social-media notifications, receipts, automated alerts, mass \
+mail. A genuine message from a REAL PERSON that involves the user (an introduction, a \
+collaboration, coordination, a question) is NEVER "skip" — it is "reply" or "read".
 
 Rules:
 - "project" must be copied EXACTLY from the provided list or be null. Never invent one.
