@@ -6,12 +6,12 @@ import { Icon } from "./Icons";
 import PageHeader from "./PageHeader";
 import { EmptyState, Field, SkeletonGrid } from "./IdeasPane";
 
-const CITY_KEY = "ip.events.city";
-const SUGGESTED = ["London", "New York", "Berlin", "San Francisco", "Paris", "Tokyo"];
+const CITY_KEY = "ip.events.city.v2"; // bumped so the stale saved city resets to the new default
+const SUGGESTED = ["Munich", "Zürich", "Berlin", "Vienna", "London", "Paris"];
 
 export default function EventsPane() {
-  const [city, setCity] = useState("London");
-  const [draftCity, setDraftCity] = useState("London");
+  const [city, setCity] = useState("Munich");
+  const [draftCity, setDraftCity] = useState("Munich");
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(false);
   const [scouting, setScouting] = useState(false);
