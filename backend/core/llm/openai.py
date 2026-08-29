@@ -27,19 +27,23 @@ class OpenAILLM(LLMProvider):
     name = "openai"
 
     def complete(
-        self, model: str, system: str, user: str, max_tokens: int = 1024, think: bool = False
+        self, model: str, system: str, user: str, max_tokens: int = 1024,
+        think: bool = False, temperature: float | None = None,
     ) -> str:
         # `think` maps to a reasoning model's effort where applicable; for the
         # base chat models it is a no-op, so the returned text is the final
         # answer either way.
-        resp = _client().chat.completions.create(
-            model=model,
-            max_completion_tokens=max_tokens,
-            messages=[
+        kwargs: dict = {
+            "model": model,
+            "max_completion_tokens": max_tokens,
+            "messages": [
                 {"role": "system", "content": system},
                 {"role": "user", "content": user},
             ],
-        )
+        }
+        if temperature is not None:
+            kwargs["temperature"] = temperature
+        resp = _client().chat.completions.create(**kwargs)
         return resp.choices[0].message.content or ""
 
     # complete_with_search intentionally inherits the base fallback until wired

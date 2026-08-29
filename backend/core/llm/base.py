@@ -18,12 +18,15 @@ class LLMProvider(ABC):
 
     @abstractmethod
     def complete(
-        self, model: str, system: str, user: str, max_tokens: int = 1024, think: bool = False
+        self, model: str, system: str, user: str, max_tokens: int = 1024,
+        think: bool = False, temperature: float | None = None,
     ) -> str:
         """One completion, returning only the final text. `think=True` asks the
         model to reason in a hidden channel (where the vendor supports it) so
         that reasoning never leaks into the returned text; `max_tokens` must
-        then also cover the thinking, so callers budget generously."""
+        then also cover the thinking, so callers budget generously. `temperature`
+        (when set) pins sampling — e.g. 0 for deterministic triage/classification;
+        ignored while thinking, which requires the vendor's default."""
 
     def complete_with_search(
         self, model: str, system: str, user: str, max_tokens: int = 2048, max_searches: int = 5

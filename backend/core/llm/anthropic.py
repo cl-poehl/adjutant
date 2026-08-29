@@ -24,7 +24,8 @@ class AnthropicLLM(LLMProvider):
     name = "anthropic"
 
     def complete(
-        self, model: str, system: str, user: str, max_tokens: int = 1024, think: bool = False
+        self, model: str, system: str, user: str, max_tokens: int = 1024,
+        think: bool = False, temperature: float | None = None,
     ) -> str:
         kwargs: dict = {
             "model": model,
@@ -33,7 +34,9 @@ class AnthropicLLM(LLMProvider):
             "messages": [{"role": "user", "content": user}],
         }
         if think:
-            kwargs["thinking"] = {"type": "adaptive"}
+            kwargs["thinking"] = {"type": "adaptive"}  # thinking pins temperature itself
+        elif temperature is not None:
+            kwargs["temperature"] = temperature
         resp = _client().messages.create(**kwargs)
         return "".join(b.text for b in resp.content if b.type == "text")
 
