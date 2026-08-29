@@ -46,9 +46,12 @@ def get_provider() -> LLMProvider:
 
 
 def complete(
-    model: str, system: str, user: str, max_tokens: int = 1024, think: bool = False
+    model: str, system: str, user: str, max_tokens: int = 1024,
+    think: bool = False, temperature: float | None = None,
 ) -> str:
-    return get_provider().complete(model, system, user, max_tokens=max_tokens, think=think)
+    return get_provider().complete(
+        model, system, user, max_tokens=max_tokens, think=think, temperature=temperature
+    )
 
 
 def complete_with_search(

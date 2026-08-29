@@ -102,7 +102,9 @@ def classify_thread(thread: EmailThread, projects: list[dict]) -> Classification
         plist = "(no projects defined yet)"
     user = f"PROJECTS:\n{plist}\n\nTHREAD:\n{render_thread(thread)}"
 
-    raw = complete(CLASSIFY_MODEL, _SYSTEM, user, max_tokens=300)
+    # temperature=0: triage must be deterministic — the same email should always
+    # get the same verdict, not occasionally flip reply<->read across syncs.
+    raw = complete(CLASSIFY_MODEL, _SYSTEM, user, max_tokens=300, temperature=0)
     data = extract_json(raw)
 
     project = data.get("project")
