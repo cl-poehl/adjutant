@@ -2,10 +2,27 @@
 and decides whether the latest message needs a reply from me."""
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass
 
 from core.llm import CLASSIFY_MODEL, complete, extract_json
 from core.models import EmailThread
+
+# Senders we NEVER draft a reply to, even when the content looks reply-worthy —
+# e.g. flat-hunting platforms, which you handle on the site, not by email reply.
+# Comma-separated domains/substrings, matched against the latest inbound sender;
+# extend via the NEVER_REPLY_SENDERS env var.
+_NEVER_REPLY = [
+    d.strip().lower()
+    for d in os.getenv("NEVER_REPLY_SENDERS", "wg-gesucht.de").split(",")
+    if d.strip()
+]
+
+
+def _never_reply_sender(thread: EmailThread) -> bool:
+    msg = getattr(thread, "last_inbound", None) or getattr(thread, "last_message", None)
+    email = (getattr(msg, "sender_email", "") or "").lower() if msg else ""
+    return bool(email) and any(tok in email for tok in _NEVER_REPLY)
 
 _SYSTEM = """You are an email triage assistant. You will be given the user's \
 project list (name + description of what belongs in it) and an email thread.
@@ -114,6 +131,10 @@ def classify_thread(thread: EmailThread, projects: list[dict]) -> Classification
     relevance = data.get("relevance")
     if relevance not in ("reply", "read", "skip"):
         relevance = "read"  # fail open: never silently bury mail
+    # Hard rule: never draft to certain senders — downgrade reply -> read so the
+    # mail stays visible but never gets a drafted response.
+    if relevance == "reply" and _never_reply_sender(thread):
+        relevance = "read"
     urgency = data.get("urgency")
     if urgency not in ("high", "normal"):
         urgency = "normal"
